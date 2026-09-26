@@ -2,18 +2,16 @@
 
 import { Activity } from 'lucide-react'
 import { GlassCard } from '@/components/lunelle-shared'
-import { useLocalStorage } from '@/lib/use-local-storage'
-
-type CycleEntry = { id: string; startDate: string; length: number; flow: string; notes: string }
+import { useCycles } from '@/lib/use-cycles'
 
 export function InsightsPage() {
-  const [cycles] = useLocalStorage<CycleEntry[]>('lunelle-cycles', [])
+  const { cycles, loading } = useCycles()
 
   const lengths = cycles.map((c) => c.length)
   const avgLength = lengths.length ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length) : 0
   const shortest = lengths.length ? Math.min(...lengths) : 0
   const longest = lengths.length ? Math.max(...lengths) : 0
-  const recent = [...cycles].sort((a, b) => (a.startDate < b.startDate ? 1 : -1)).slice(0, 6).reverse()
+  const recent = [...cycles].sort((a, b) => (a.start_date < b.start_date ? 1 : -1)).slice(0, 6).reverse()
   const maxBar = Math.max(...recent.map((c) => c.length), 1)
 
   return (
@@ -22,7 +20,7 @@ export function InsightsPage() {
         <div>
           <p className="eyebrow pink"><Activity size={14} /> Insights</p>
           <h1>Patterns & trends<span>.</span></h1>
-          <p className="lede">A quick look at what your logged cycles show so far.</p>
+          <p className="lede">{loading ? 'Loading\u2026' : 'A quick look at what your logged cycles show so far.'}</p>
         </div>
       </div>
 
@@ -37,7 +35,7 @@ export function InsightsPage() {
 
         <GlassCard className="calendar-card">
           <div className="card-heading"><div><p className="eyebrow">Recent cycles</p><h3>Length over time</h3></div></div>
-          {recent.length === 0 && <p className="empty-state">Log a few cycles on the &quot;My cycles&quot; page and your trend will show up here.</p>}
+          {!loading && recent.length === 0 && <p className="empty-state">Log a few cycles on the &quot;My cycles&quot; page and your trend will show up here.</p>}
           {recent.length > 0 && (
             <div className="bar-chart">
               {recent.map((c) => (

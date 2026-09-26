@@ -1,5 +1,5 @@
-import { LunelleDashboard } from '@/components/lunelle-dashboard'
+import { LunelleLanding } from '@/components/lunelle-landing'
 
 export default function Page() {
-  return <LunelleDashboard />
+  return <LunelleLanding />
 }
