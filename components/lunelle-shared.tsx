@@ -12,31 +12,28 @@ export function GlassCard({ children, className = '' }: { children: React.ReactN
 export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => void }) {
   const petRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x: 75, y: 75 })
-  const [facing, setFacing] = useState(1) // 1 = facing right, -1 = facing left
+  const [facing, setFacing] = useState(1) // 1 = facing right, -1 = facing left (mirrored)
   const [dragging, setDragging] = useState(false)
   const [jumping, setJumping] = useState(false)
   const [mood, setMood] = useState('happy')
   const [eyes, setEyes] = useState({ x: 0, y: 0 })
 
-  // Reactive eyes: pupils follow the cursor, but only when not dragging
   useEffect(() => {
     const handlePointer = (event: PointerEvent) => {
       const node = petRef.current
       if (!node || dragging) return
       const rect = node.getBoundingClientRect()
       const dx = event.clientX - (rect.left + rect.width / 2)
-      const dy = event.clientY - (rect.top + rect.height * 0.35) // aim roughly at the head, not the whole sprite
+      const dy = event.clientY - (rect.top + rect.height * 0.3)
       const distance = Math.max(Math.hypot(dx, dy), 1)
-      setEyes({ x: Math.max(-2.5, Math.min(2.5, (dx / distance) * 2.5)), y: Math.max(-2, Math.min(2, (dy / distance) * 2)) })
+      setEyes({ x: Math.max(-2, Math.min(2, (dx / distance) * 2)), y: Math.max(-1.6, Math.min(1.6, (dy / distance) * 1.6)) })
     }
     window.addEventListener('pointermove', handlePointer)
     return () => window.removeEventListener('pointermove', handlePointer)
   }, [dragging])
 
-  // Wandering: every few seconds, walk to a new random nearby spot
   useEffect(() => {
     let cancelled = false
-
     function wander() {
       if (cancelled || dragging) return
       setPosition((prev) => {
@@ -46,7 +43,6 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
         return { x: nextX, y: nextY }
       })
     }
-
     const interval = window.setInterval(wander, 4500 + Math.random() * 2000)
     return () => {
       cancelled = true
@@ -83,6 +79,9 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
     window.setTimeout(() => setJumping(false), 600)
   }
 
+  // counter the parent's scaleX(-1) mirror so pupils always point at the real cursor, not the mirrored one
+  const pupilX = eyes.x * facing
+
   return (
     <div
       ref={petRef}
@@ -102,10 +101,10 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
       <div className="pet-sprite">
         <div className="pet-eyes">
           <span className="pet-eye">
-            <span className="eye-pupil" style={{ transform: `translate(${eyes.x}px, ${eyes.y}px)` }} />
+            <span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} />
           </span>
           <span className="pet-eye">
-            <span className="eye-pupil" style={{ transform: `translate(${eyes.x}px, ${eyes.y}px)` }} />
+            <span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} />
           </span>
         </div>
         <img

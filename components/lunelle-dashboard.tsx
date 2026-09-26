@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react'
 import { MushroomPet } from '@/components/lunelle-shared'
+import { CustomCursor } from '@/components/custom-cursor'
 import { OverviewPage } from '@/components/pages/overview-page'
 import { MyCyclesPage } from '@/components/pages/my-cycles-page'
 import { InsightsPage } from '@/components/pages/insights-page'
@@ -109,7 +110,7 @@ export function LunelleDashboard() {
       </div>
 
       <MushroomPet onMoodChange={setMood} />
-      <div className="cursor-dot" />
+      <CustomCursor />
       {toast && (
         <div className="toast">
           <span className="toast-check"><Check size={16} /></span>
