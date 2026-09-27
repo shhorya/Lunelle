@@ -9,7 +9,7 @@ export const supabase = createClient(url, anonKey, {
 
 export type Flow = 'Light' | 'Medium' | 'Heavy'
 
-export type CycleRow = { id: string; start_date: string; length: number; flow: Flow; notes: string; created_at: string }
+export type CycleRow = { id: string; start_date: string; length: number; flow: Flow; notes: string; pain_level: number | null; created_at: string }
 export type SupplyRow = { id: string; name: string; checked: boolean; created_at: string }
 export type CareNoteRow = { id: string; author: string; text: string; created_at: string }
 export type CheckinRow = { id: string; mood: string; note: string; created_at: string }
@@ -20,5 +20,6 @@ export type SettingsRow = {
   default_cycle_length: number
   default_period_length: number
   notifications: boolean
+  reference_notes: string
   updated_at: string
 }

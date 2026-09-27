@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, Settings2 } from 'lucide-react'
 import { GlassCard } from '@/components/lunelle-shared'
 import { useSettings } from '@/lib/use-settings'
@@ -16,6 +16,15 @@ export function SettingsPage() {
 
   async function handleUpdate(key: 'name_a' | 'name_b' | 'default_cycle_length' | 'default_period_length' | 'notifications', value: any) {
     await update({ [key]: value } as any)
+    flashSaved()
+  }
+
+  const [refNotes, setRefNotes] = useState(settings.reference_notes)
+  useEffect(() => { setRefNotes(settings.reference_notes) }, [settings.reference_notes])
+
+  async function saveRefNotes() {
+    if (refNotes === settings.reference_notes) return
+    await update({ reference_notes: refNotes })
     flashSaved()
   }
 
@@ -64,6 +73,19 @@ export function SettingsPage() {
               {settings.notifications && <Check size={14} color="#65af96" />}
             </label>
           </div>
+        </GlassCard>
+
+        <GlassCard className="calendar-card">
+          <div className="card-heading"><div><p className="eyebrow">Reference</p><h3>Quick reference</h3></div></div>
+          <p className="lede" style={{ margin: '4px 0 12px' }}>Pad brands, relief methods, pain areas, anything worth remembering.</p>
+          <textarea
+            className="text-input"
+            style={{ width: '100%', minHeight: 160, resize: 'vertical' }}
+            placeholder="e.g. Preferred pads: Nua XL > Whisper. Relief: hot water bag, chocolate. Avoids painkillers."
+            value={refNotes}
+            onChange={(e) => setRefNotes(e.target.value)}
+            onBlur={saveRefNotes}
+          />
         </GlassCard>
       </div>
     </>

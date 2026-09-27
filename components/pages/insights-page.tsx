@@ -13,6 +13,9 @@ export function InsightsPage() {
   const longest = lengths.length ? Math.max(...lengths) : 0
   const recent = [...cycles].sort((a, b) => (a.start_date < b.start_date ? 1 : -1)).slice(0, 6).reverse()
   const maxBar = Math.max(...recent.map((c) => c.length), 1)
+  const painValues = cycles.map((c) => c.pain_level).filter((p): p is number => p != null)
+  const avgPain = painValues.length ? Math.round((painValues.reduce((a, b) => a + b, 0) / painValues.length) * 10) / 10 : 0
+  const worstPain = painValues.length ? Math.max(...painValues) : 0
 
   return (
     <>
@@ -30,6 +33,14 @@ export function InsightsPage() {
             <div className="stat-box"><span>Average length</span><strong>{avgLength ? `${avgLength} days` : '—'}</strong></div>
             <div className="stat-box"><span>Shortest</span><strong>{shortest ? `${shortest} days` : '—'}</strong></div>
             <div className="stat-box"><span>Longest</span><strong>{longest ? `${longest} days` : '—'}</strong></div>
+          </div>
+        </GlassCard>
+
+        <GlassCard>
+          <div className="stat-grid">
+            <div className="stat-box"><span>Avg pain level</span><strong>{painValues.length ? `${avgPain}/10` : '—'}</strong></div>
+            <div className="stat-box"><span>Worst logged</span><strong>{painValues.length ? `${worstPain}/10` : '—'}</strong></div>
+            <div className="stat-box"><span>Entries logged</span><strong>{painValues.length}</strong></div>
           </div>
         </GlassCard>
 

@@ -10,6 +10,7 @@ const fallback: SettingsRow = {
   default_cycle_length: 28,
   default_period_length: 5,
   notifications: true,
+  reference_notes: '',
   updated_at: new Date().toISOString(),
 }
 

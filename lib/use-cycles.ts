@@ -24,12 +24,13 @@ export function useCycles() {
     return () => { supabase.removeChannel(channel) }
   }, [refresh])
 
-  async function addCycle(entry: { startDate: string; length: number; flow: Flow; notes: string }) {
+  async function addCycle(entry: { startDate: string; length: number; flow: Flow; notes: string; painLevel?: number | null }) {
     const { error } = await supabase.from('cycles').insert({
       start_date: entry.startDate,
       length: entry.length,
       flow: entry.flow,
       notes: entry.notes,
+      pain_level: entry.painLevel ?? null,
     })
     if (error) setError(error.message)
     else refresh()
