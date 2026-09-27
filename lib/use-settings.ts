@@ -5,8 +5,8 @@ import { supabase, type SettingsRow } from '@/lib/supabase'
 
 const fallback: SettingsRow = {
   id: 1,
-  name_a: 'A',
-  name_b: 'J',
+  name_a: 'G',
+  name_b: 'S',
   default_cycle_length: 28,
   default_period_length: 5,
   notifications: true,

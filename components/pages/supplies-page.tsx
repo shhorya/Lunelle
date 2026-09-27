@@ -41,7 +41,7 @@ export function SuppliesPage() {
 
         <GlassCard className="calendar-card">
           <div className="card-heading"><div><p className="eyebrow">Checklist</p><h3>Tick what you have</h3></div></div>
-          {!loading && items.length === 0 && <p className="empty-state">Nothing here yet — add your first supply on the left.</p>}
+          {!loading && items.length === 0 && <p className="empty-state">Nothing here yet. Add your first supply on the left.</p>}
           <div className="checklist">
             {items.map((item) => (
               <label className="checklist-item" key={item.id}>

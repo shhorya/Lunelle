@@ -46,7 +46,7 @@ export function CareNotesPage() {
 
         <GlassCard className="calendar-card">
           <div className="card-heading"><div><p className="eyebrow">Board</p><h3>{loading ? 'Loading\u2026' : `${notes.length} note${notes.length === 1 ? '' : 's'}`}</h3></div></div>
-          {!loading && notes.length === 0 && <p className="empty-state">No notes yet — be the first to leave one.</p>}
+          {!loading && notes.length === 0 && <p className="empty-state">No notes yet. Be the first to leave one.</p>}
           {notes.map((note) => (
             <div className="note-card" key={note.id}>
               <div className="note-meta"><span className="avatar small">{note.author?.[0] ?? '?'}</span><small>{new Date(note.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</small></div>

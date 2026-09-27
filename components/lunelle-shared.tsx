@@ -9,15 +9,35 @@ export function GlassCard({ children, className = '' }: { children: React.ReactN
   return <section className={`glass-card ${className}`}>{children}</section>
 }
 
+const idleLines = ['hi!', 'nice day, huh?', 'miss you already', 'just vibing here', 'tap me!', 'hehe']
+const consolingLines = [
+  "it's okay to rest today",
+  "you're doing great",
+  'breathe. you got this',
+  'sending you a big hug',
+  "today doesn't have to be perfect",
+  'proud of you, always',
+]
+
+type FloatingHeart = { id: number; x: number }
+
 export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => void }) {
   const petRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x: 75, y: 75 })
-  const [facing, setFacing] = useState(1) // 1 = facing right, -1 = facing left (mirrored)
+  const [facing, setFacing] = useState(1)
   const [dragging, setDragging] = useState(false)
   const [jumping, setJumping] = useState(false)
-  const [mood, setMood] = useState('happy')
+  const [hovered, setHovered] = useState(false)
+  const [bubbleText, setBubbleText] = useState(idleLines[0])
+  const [hearts, setHearts] = useState<FloatingHeart[]>([])
   const [eyes, setEyes] = useState({ x: 0, y: 0 })
 
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null)
+  const movedRef = useRef(false)
+  const heartId = useRef(0)
+  const idleIndex = useRef(0)
+
+  // reactive eyes
   useEffect(() => {
     const handlePointer = (event: PointerEvent) => {
       const node = petRef.current
@@ -32,6 +52,27 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
     return () => window.removeEventListener('pointermove', handlePointer)
   }, [dragging])
 
+  // idle bubble rotation
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (dragging || hovered) return
+      idleIndex.current = (idleIndex.current + 1) % idleLines.length
+      setBubbleText(idleLines[idleIndex.current])
+    }, 5000)
+    return () => window.clearInterval(interval)
+  }, [dragging, hovered])
+
+  // hover shows a consoling line
+  useEffect(() => {
+    if (dragging) return
+    if (hovered) {
+      setBubbleText(consolingLines[Math.floor(Math.random() * consolingLines.length)])
+    } else {
+      setBubbleText(idleLines[idleIndex.current])
+    }
+  }, [hovered, dragging])
+
+  // wandering
   useEffect(() => {
     let cancelled = false
     function wander() {
@@ -50,36 +91,61 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
     }
   }, [dragging])
 
-  const pet = () => {
-    setMood('loved')
+  function spawnHearts() {
+    const fresh: FloatingHeart[] = [0, 1, 2].map((i) => ({ id: heartId.current++, x: (i - 1) * 16 }))
+    setHearts((prev) => [...prev, ...fresh])
+    fresh.forEach((h) => {
+      window.setTimeout(() => setHearts((prev) => prev.filter((x) => x.id !== h.id)), 900)
+    })
+  }
+
+  function pet() {
     setJumping(true)
+    spawnHearts()
     onMoodChange('Mushroom is feeling very loved')
+    setBubbleText('♡')
     window.setTimeout(() => setJumping(false), 700)
+    window.setTimeout(() => { if (!hovered) setBubbleText(idleLines[idleIndex.current]) }, 1400)
   }
 
   const dragStart = (event: React.PointerEvent) => {
     event.currentTarget.setPointerCapture(event.pointerId)
-    setDragging(true)
-    setMood('held')
-    onMoodChange('Pick me up!')
+    dragStartPos.current = { x: event.clientX, y: event.clientY }
+    movedRef.current = false
   }
 
   const dragMove = (event: React.PointerEvent) => {
-    if (!dragging) return
-    const x = Math.max(8, Math.min(87, (event.clientX / window.innerWidth) * 100 - 7))
-    const y = Math.max(8, Math.min(84, (event.clientY / window.innerHeight) * 100 - 8))
-    setPosition({ x, y })
+    if (!dragStartPos.current) return
+    const dx = event.clientX - dragStartPos.current.x
+    const dy = event.clientY - dragStartPos.current.y
+    if (!movedRef.current && Math.hypot(dx, dy) > 6) {
+      movedRef.current = true
+      setDragging(true)
+      setBubbleText('wheee')
+      onMoodChange('Pick me up!')
+    }
+    if (movedRef.current) {
+      const x = Math.max(8, Math.min(87, (event.clientX / window.innerWidth) * 100 - 7))
+      const y = Math.max(8, Math.min(84, (event.clientY / window.innerHeight) * 100 - 8))
+      setPosition({ x, y })
+    }
   }
 
   const dragEnd = () => {
-    setDragging(false)
-    setMood('landed')
-    setJumping(true)
-    onMoodChange('That was a soft landing')
-    window.setTimeout(() => setJumping(false), 600)
+    if (movedRef.current) {
+      setDragging(false)
+      setJumping(true)
+      onMoodChange('That was a soft landing')
+      setBubbleText('that tickled')
+      window.setTimeout(() => setJumping(false), 600)
+      window.setTimeout(() => { if (!hovered) setBubbleText(idleLines[idleIndex.current]) }, 1400)
+    } else {
+      pet()
+    }
+    dragStartPos.current = null
+    movedRef.current = false
   }
 
-  // counter the parent's scaleX(-1) mirror so pupils always point at the real cursor, not the mirrored one
   const pupilX = eyes.x * facing
 
   return (
@@ -90,22 +156,19 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
       onPointerDown={dragStart}
       onPointerMove={dragMove}
       onPointerUp={dragEnd}
-      onDoubleClick={pet}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
       role="button"
       tabIndex={0}
-      aria-label="Mushroom the penguin. Double click to pet, drag to move."
+      aria-label="Mushroom the penguin. Tap to pet, drag to move."
       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') pet() }}
     >
-      <div className="pet-bubble">{mood === 'held' ? 'wheee' : mood === 'loved' ? '♡' : 'hi!'}</div>
+      <div className="pet-bubble"><span className="pet-bubble-inner">{bubbleText}</span></div>
       <div className="pet-shadow" />
       <div className="pet-sprite">
         <div className="pet-eyes">
-          <span className="pet-eye">
-            <span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} />
-          </span>
-          <span className="pet-eye">
-            <span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} />
-          </span>
+          <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} /></span>
+          <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} /></span>
         </div>
         <img
           src={mascotSrc}
@@ -115,6 +178,9 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
         />
       </div>
       <div className="pet-tag"><PawPrint size={12} /> Mushroom</div>
+      {hearts.map((h) => (
+        <span key={h.id} className="pet-float-heart" style={{ left: `calc(50% + ${h.x}px)` }}>♥</span>
+      ))}
     </div>
   )
 }

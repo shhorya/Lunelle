@@ -63,7 +63,7 @@ export function MyCyclesPage() {
 
         <GlassCard className="calendar-card">
           <div className="card-heading"><div><p className="eyebrow">Timeline</p><h3>{loading ? 'Loading\u2026' : `${cycles.length} cycle${cycles.length === 1 ? '' : 's'} logged`}</h3></div></div>
-          {!loading && cycles.length === 0 && <p className="empty-state">No cycles logged yet — add your first one on the left.</p>}
+          {!loading && cycles.length === 0 && <p className="empty-state">No cycles logged yet. Add your first one on the left.</p>}
           {cycles.map((cycle) => (
             <div className="log-item" key={cycle.id}>
               <span>{new Date(cycle.start_date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' })}</span>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronRight, Droplets, Heart, MoreHorizontal, Plus, Sparkles, Target, Zap } from 'lucide-react'
+import { ChevronRight, Droplets, Heart, MoreHorizontal, Plus, Sparkles, Target, Zap, X } from 'lucide-react'
 import { GlassCard } from '@/components/lunelle-shared'
 import { useCheckins } from '@/lib/use-checkins'
 import { useCycles } from '@/lib/use-cycles'
@@ -29,14 +29,35 @@ export function OverviewPage({
   logPeriod: () => void
   stats: Stats
 }) {
-  const { addCheckin, latest } = useCheckins()
+  const { checkins, addCheckin, latest, error: checkinError } = useCheckins()
   const { cycles, addCycle } = useCycles()
   const [activeMoodKey, setActiveMoodKey] = useState(latest?.mood ?? 'calm')
   const [month, setMonth] = useState(() => new Date())
   const [showMoreMenu, setShowMoreMenu] = useState<'mood' | 'symptoms' | null>(null)
   const [expandedInsight, setExpandedInsight] = useState(false)
   const [justLogged, setJustLogged] = useState<string | null>(null)
+  const [showMoodHistory, setShowMoodHistory] = useState(false)
+  const [showSymptomLog, setShowSymptomLog] = useState(false)
+  const [symptomText, setSymptomText] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMoreMenu(null)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      setShowMoodHistory(false)
+      setShowSymptomLog(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   function logDay(date: Date) {
     const iso = date.toISOString().slice(0, 10)
@@ -56,6 +77,17 @@ export function OverviewPage({
     addCheckin(m.key, m.line)
   }
 
+  function submitSymptom(e: React.FormEvent) {
+    e.preventDefault()
+    if (!symptomText.trim()) return
+    addCheckin('symptom', symptomText.trim())
+    setSymptomText('')
+    setShowSymptomLog(false)
+  }
+
+  const symptomEntries = useMemo(() => checkins.filter((c) => c.mood === 'symptom'), [checkins])
+  const moodOnlyEntries = useMemo(() => checkins.filter((c) => c.mood !== 'symptom'), [checkins])
+
   const calendarDays = useMemo(() => buildCalendarDays(stats.latestStart, 5, month), [stats.latestStart, month])
   const weekdayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
   const monthLabel = month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
@@ -63,6 +95,10 @@ export function OverviewPage({
   const phaseSentence = stats.hasData
     ? phaseCopy(stats.phase)
     : 'Log your first cycle to start seeing personalized phase insights here.'
+
+  function fmtWhen(iso: string) {
+    return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  }
 
   return (
     <>
@@ -74,6 +110,8 @@ export function OverviewPage({
         </div>
         <button className="primary-button" onClick={logPeriod}><Plus size={18} /> Log today</button>
       </div>
+
+      {checkinError && <div className="banner">Couldn&apos;t reach the database: {checkinError}</div>}
 
       <div className="dashboard-grid">
         <GlassCard className="cycle-hero">
@@ -93,11 +131,11 @@ export function OverviewPage({
         <GlassCard className="mood-card">
           <div className="card-heading">
             <div><p className="eyebrow">How are you?</p><h3>A tiny check-in</h3></div>
-            <div ref={menuRef} style={{ position: 'relative' }}>
+            <div ref={showMoreMenu === 'mood' ? menuRef : undefined} style={{ position: 'relative' }}>
               <button className="more-button" onClick={() => setShowMoreMenu(showMoreMenu === 'mood' ? null : 'mood')}><MoreHorizontal size={18} /></button>
               {showMoreMenu === 'mood' && (
                 <div className="dropdown-menu">
-                  <button onClick={() => setShowMoreMenu(null)}>View mood history</button>
+                  <button onClick={() => { setShowMoodHistory(true); setShowMoreMenu(null) }}>View mood history</button>
                   <button onClick={() => { setActiveMoodKey('calm'); setMood('Double click Mushroom to give him a little love'); setShowMoreMenu(null) }}>Reset check-in</button>
                 </div>
               )}
@@ -116,12 +154,12 @@ export function OverviewPage({
         <GlassCard className="symptoms-card">
           <div className="card-heading">
             <div><p className="eyebrow">This month</p><h3>Body signals</h3></div>
-            <div style={{ position: 'relative' }}>
+            <div ref={showMoreMenu === 'symptoms' ? menuRef : undefined} style={{ position: 'relative' }}>
               <button className="more-button" onClick={() => setShowMoreMenu(showMoreMenu === 'symptoms' ? null : 'symptoms')}><MoreHorizontal size={18} /></button>
               {showMoreMenu === 'symptoms' && (
                 <div className="dropdown-menu">
-                  <button onClick={() => setShowMoreMenu(null)}>Log a symptom</button>
-                  <button onClick={() => setShowMoreMenu(null)}>View history</button>
+                  <button onClick={() => { setShowSymptomLog(true); setShowMoreMenu(null) }}>Log a symptom</button>
+                  <button onClick={() => { setShowMoodHistory(true); setShowMoreMenu(null) }}>View history</button>
                 </div>
               )}
             </div>
@@ -129,7 +167,7 @@ export function OverviewPage({
           <div className="signal-list">
             <div><span className="signal-icon blush"><Droplets size={16} /></span><span><b>Flow</b><small>{stats.hasData ? `Day ${stats.dayOfCycle} of cycle` : 'No data yet'}</small></span><strong>{stats.hasData ? '\u2197' : '\u2013'}</strong></div>
             <div><span className="signal-icon yellow"><Zap size={16} /></span><span><b>Energy</b><small>{stats.phase === 'menstrual' ? 'Take it slow' : 'Steady & bright'}</small></span><strong>{stats.phase === 'menstrual' ? '\u2193' : '\u2197'}</strong></div>
-            <div><span className="signal-icon lilac"><Target size={16} /></span><span><b>Cycles logged</b><small>{cycles.length} total</small></span><strong>{'\u2192'}</strong></div>
+            <div><span className="signal-icon lilac"><Target size={16} /></span><span><b>Symptoms</b><small>{symptomEntries.length} gentle note{symptomEntries.length === 1 ? '' : 's'}</small></span><strong>{'\u2192'}</strong></div>
           </div>
         </GlassCard>
 
@@ -148,7 +186,7 @@ export function OverviewPage({
                 key={index}
                 type="button"
                 className={`calendar-day ${item.isPeriod ? 'period-day' : ''} ${item.isToday ? 'today' : ''} ${!item.inMonth ? 'muted-day' : ''}`}
-                title={justLogged === item.date.toISOString().slice(0, 10) ? 'Logged!' : `${item.date.toDateString()} \u2014 click to log a period start here`}
+                title={justLogged === item.date.toISOString().slice(0, 10) ? 'Logged!' : `${item.date.toDateString()} - click to log a period start here`}
                 onClick={() => logDay(item.date)}
               >
                 {item.day}
@@ -178,6 +216,39 @@ export function OverviewPage({
           </div>
         </GlassCard>
       </div>
+
+      {showMoodHistory && (
+        <div className="modal-backdrop" onClick={() => setShowMoodHistory(false)}>
+          <div className="log-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowMoodHistory(false)}><X size={18} /></button>
+            <p className="eyebrow pink">Your history</p>
+            <h2>Check-ins</h2>
+            <p className="lede">Every mood and symptom note you&apos;ve logged, most recent first.</p>
+            {checkins.length === 0 && <p className="empty-state">Nothing logged yet — pick a mood or log a symptom to get started.</p>}
+            {checkins.slice(0, 20).map((c) => (
+              <div className="log-item" key={c.id}>
+                <span>{fmtWhen(c.created_at)}</span>
+                <div><b>{c.mood === 'symptom' ? 'Symptom' : c.mood}</b><small>{c.note}</small></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showSymptomLog && (
+        <div className="modal-backdrop" onClick={() => setShowSymptomLog(false)}>
+          <div className="log-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowSymptomLog(false)}><X size={18} /></button>
+            <p className="eyebrow pink">Body signals</p>
+            <h2>Log a symptom</h2>
+            <p className="lede">A quick, gentle note — cramps, headache, fatigue, anything.</p>
+            <form className="field-group" onSubmit={submitSymptom}>
+              <input className="text-input" type="text" autoFocus placeholder="e.g. Mild cramps today" value={symptomText} onChange={(e) => setSymptomText(e.target.value)} />
+              <button type="submit" className="primary-button full"><Plus size={18} /> Save symptom</button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -85,6 +85,19 @@ export function LunelleDashboard() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      setShowLog(false)
+      setShowSearch(false)
+      setShowHelp(false)
+      setAddingCycle(false)
+      setQuery('')
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   const [timeGreeting, setTimeGreeting] = useState('Hello')
   useEffect(() => {
     const hour = new Date().getHours()
@@ -192,7 +205,7 @@ export function LunelleDashboard() {
             <div className="dropdown-menu" style={{ top: 'calc(100% + 6px)' }}>
               <button onClick={() => { setActiveNav('Settings'); setShowProfileMenu(false) }}><User size={14} /> Edit names</button>
               <button onClick={() => { setActiveNav('Settings'); setShowProfileMenu(false) }}><Settings2 size={14} /> Preferences</button>
-              <button className="danger" onClick={() => { setShowProfileMenu(false); setToast({ title: 'This is a shared space', body: 'There\u2019s no sign-out here \u2014 it\u2019s just the two of you.' }); window.setTimeout(() => setToast(null), 2600) }}><LogOut size={14} /> Sign out</button>
+              <button className="danger" onClick={() => { setShowProfileMenu(false); setToast({ title: 'This is a shared space', body: 'There\u2019s no sign-out here, it\u2019s just the two of you.' }); window.setTimeout(() => setToast(null), 2600) }}><LogOut size={14} /> Sign out</button>
             </div>
           )}
         </div>
@@ -237,7 +250,7 @@ export function LunelleDashboard() {
               )}
             </div>
             <button className="theme-button" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun size={16} /> : <Moon size={16} />}<span>{dark ? 'Light' : 'Dark'}</span></button>
-            <div className="avatar small">{settings.name_a?.[0] ?? 'A'}</div>
+            <button className="avatar small" onClick={() => setActiveNav('Settings')} aria-label="Open settings" style={{ border: 0, cursor: 'pointer' }}>{settings.name_a?.[0] ?? 'A'}</button>
           </div>
         </header>
 
@@ -310,7 +323,7 @@ export function LunelleDashboard() {
             <button className="modal-close" onClick={() => setShowHelp(false)}><X size={18} /></button>
             <p className="eyebrow pink">A little help</p>
             <h2>How Lunelle works</h2>
-            <p className="lede" style={{ marginBottom: 16 }}>Everything you log here syncs live between you and {settings.name_b || 'your partner'} \u2014 no accounts, just a shared space.</p>
+            <p className="lede" style={{ marginBottom: 16 }}>Everything you log here syncs live between you and {settings.name_b || 'your partner'}, no accounts, just a shared space.</p>
             <div className="log-item"><div><b>Log today</b><small>Adds a period start on the Overview page.</small></div></div>
             <div className="log-item"><div><b>My cycles</b><small>See and edit your full cycle history.</small></div></div>
             <div className="log-item"><div><b>Supplies & Care notes</b><small>A shared checklist and message board for you two.</small></div></div>

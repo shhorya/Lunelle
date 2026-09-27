@@ -3,25 +3,11 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Lunelle — a softer way to track your rhythm',
+  title: 'Lunelle for Gunjan',
   description: 'A private, playful cycle companion for gentle daily check-ins, cycle insights, and care.',
-  generator: 'v0.app',
+  robots: { index: false, follow: false },
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/icon.svg',
   },
 }
 

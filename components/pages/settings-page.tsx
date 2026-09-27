@@ -25,14 +25,14 @@ export function SettingsPage() {
         <div>
           <p className="eyebrow pink"><Settings2 size={14} /> Settings</p>
           <h1>Preferences<span>.</span></h1>
-          <p className="lede">{loading ? 'Loading\u2026' : 'Saved live to your shared space — visible to both of you.'}</p>
+          <p className="lede">{loading ? 'Loading\u2026' : 'Saved live to your shared space, visible to both of you.'}</p>
         </div>
         {saved && <span className="sync-pill"><span className="dot" /> Saved</span>}
       </div>
 
       {error && <div className="banner">Couldn&apos;t reach the database: {error}</div>}
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid settings-grid">
         <GlassCard>
           <div className="card-heading"><div><p className="eyebrow">Names</p><h3>Who&apos;s using this</h3></div></div>
           <div className="field-group">
