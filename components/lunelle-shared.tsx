@@ -9,9 +9,12 @@ export function GlassCard({ children, className = '' }: { children: React.ReactN
   return <section className={`glass-card ${className}`}>{children}</section>
 }
 
-const idleLines = ['hi!', 'nice day, huh?', 'miss you already', 'just vibing here', 'tap me!', 'hehe']
+const idleLines = ['hii gappu!', 'momos khaaegi?','nice day, huh?', 'I love You!', 'hello mushroom ki mushroomi', 'cuddle me!', 'miss you already', 'just vibing here', 'pick me!', 'tap me!', 'aaann, college nhi jaana', 'hehe']
 const consolingLines = [
   "it's okay to rest today",
+  "wanna go on another mkt date?",
+  "it's okay to cry",
+  "cuddle me, i'm here for you",
   "you're doing great",
   'breathe. you got this',
   'sending you a big hug',

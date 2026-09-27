@@ -69,7 +69,7 @@ export function LunelleLanding() {
 
       <div className="landing-card" ref={heroRef}>
         <header className="landing-nav">
-          <div className="brand-mark"><span className="brand-orb">✳</span><span>lunelle</span></div>
+          <div className="brand-mark"><img src="/logo.png" alt="Lunelle" className="brand-orb" /><span>lunelle</span></div>
           <div className="landing-nav-right">
             <span className="landing-nav-hint">Made specially for Gunjan</span>
             <Link href="/dashboard" className="landing-link">Open Lunelle <ArrowRight size={14} /></Link>

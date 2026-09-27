@@ -194,7 +194,7 @@ export function LunelleDashboard() {
       <div className="aurora aurora-one" />
       <div className="aurora aurora-two" />
       <aside className="sidebar">
-        <div className="brand-mark"><span className="brand-orb">✳</span><span>lunelle</span></div>
+        <div className="brand-mark"><img src="/logo.png" alt="Lunelle" className="brand-orb" /><span>lunelle</span></div>
         <div className="profile-mini" ref={profileRef} style={{ position: 'relative' }}>
           <div className="avatar">{settings.name_a?.[0] ?? 'A'}</div>
           <div><strong>{settings.name_a} & {settings.name_b}</strong><span>Our little space</span></div>

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'A private, playful cycle companion for gentle daily check-ins, cycle insights, and care.',
   robots: { index: false, follow: false },
   icons: {
-    icon: '/icon.svg',
+    icon: '/logo.png',
   },
 }
 
