@@ -155,7 +155,7 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
     <div
       ref={petRef}
       className={`mushroom-pet ${dragging ? 'is-held' : ''} ${jumping ? 'is-jumping' : ''}`}
-      style={{ left: `${position.x}%`, top: `${position.y}%`, ['--face' as any]: facing }}
+      style={{ left: `${position.x}%`, top: `${position.y}%` }}
       onPointerDown={dragStart}
       onPointerMove={dragMove}
       onPointerUp={dragEnd}
@@ -169,16 +169,18 @@ export function MushroomPet({ onMoodChange }: { onMoodChange: (mood: string) => 
       <div className="pet-bubble"><span className="pet-bubble-inner">{bubbleText}</span></div>
       <div className="pet-shadow" />
       <div className="pet-sprite">
-        <div className="pet-eyes">
-          <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} /></span>
-          <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${pupilX}px, ${eyes.y}px)` }} /></span>
+        <div className="pet-flip" style={{ ['--face' as any]: facing }}>
+          <div className="pet-eyes">
+            <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${eyes.x}px, ${eyes.y}px)` }} /></span>
+            <span className="pet-eye"><span className="eye-pupil" style={{ transform: `translate(${eyes.x}px, ${eyes.y}px)` }} /></span>
+          </div>
+          <img
+            src={mascotSrc}
+            alt="Mushroom, the cheerful blue penguin"
+            draggable={false}
+            onDragStart={(event) => event.preventDefault()}
+          />
         </div>
-        <img
-          src={mascotSrc}
-          alt="Mushroom, the cheerful blue penguin"
-          draggable={false}
-          onDragStart={(event) => event.preventDefault()}
-        />
       </div>
       <div className="pet-tag"><PawPrint size={12} /> Mushroom</div>
       {hearts.map((h) => (
